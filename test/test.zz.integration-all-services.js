@@ -123,7 +123,7 @@ describe('integration-all-services', function() {
             done();
           });
         });
-        
+
         it('should classify an image via url', function(done) {
           var params = {
             url: 'https://watson-test-resources.mybluemix.net/resources/car.png'
@@ -288,7 +288,7 @@ describe('integration-all-services', function() {
     });
   });
 
-  describe('functional_concept_insights', function() {
+  describe.only('functional_concept_insights', function() {
     this.timeout(TEN_SECONDS);
 
     var sample = {
@@ -322,6 +322,7 @@ describe('integration-all-services', function() {
     });
 
     it('searchConceptByLabel()', function(done) {
+      this.timeout(THIRTY_SECONDS);
       concept_insights.graphs.searchConceptByLabel({
         graph: sample.graph,
         query: 'ibm'
@@ -391,6 +392,7 @@ describe('integration-all-services', function() {
     });
 
     it('searchByLabel()', function(done) {
+      this.timeout(THIRTY_SECONDS);
       concept_insights.corpora.searchByLabel({
         corpus: sample.corpus,
         query: 'ibm'
@@ -398,6 +400,7 @@ describe('integration-all-services', function() {
     });
 
     it('getRelatedDocuments()', function(done) {
+      this.timeout(THIRTY_SECONDS);
       concept_insights.corpora.getRelatedDocuments({
         corpus: sample.corpus,
         ids: [sample.concept]
