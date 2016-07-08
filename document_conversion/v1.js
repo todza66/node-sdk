@@ -16,39 +16,37 @@
 
 'use strict';
 
-var extend         = require('extend');
 var requestFactory = require('../lib/requestwrapper');
 var isStream       = require('isstream');
 var omit           = require('object.omit');
+var util = require('util');
+var BaseService = require('../lib/base_service');
 
 /**
  *
  * @param options
  * @constructor
  */
-function DocumentConversion(options) {
+function DocumentConversionV1(options) {
+  BaseService.call(this, options);
+
   // Warn if not specifying version date
-  var version_date = '2015-12-01';
-  if(options && options.version_date) {
-    version_date = options.version_date;
-  } else {
+  if(!this._options.version_date && !this._options.silent) {
     // eslint-disable-next-line no-console
     console.warn('[DocumentConversion] WARNING: No version_date specified. Using a (possibly old) default. ' +
                   'e.g. watson.document_conversion({ version_date: "2015-12-01" })');
   }
-
-  // Default URL
-  var serviceDefaults = {
-    url: 'https://gateway.watsonplatform.net/document-conversion/api',
-    qs: { version: version_date }
-  };
-
-  // Replace default options with user provided
-  this._options = extend(serviceDefaults, options);
 }
+util.inherits(DocumentConversionV1, BaseService);
+DocumentConversionV1.prototype.name = 'document_conversion';
+DocumentConversionV1.prototype.version = 'v1';
+DocumentConversionV1.prototype.serviceDefaults = {
+  url: 'https://gateway.watsonplatform.net/document-conversion/api',
+  qs: { version: '2015-12-01' }
+};
 
 
-DocumentConversion.prototype.conversion_target = {
+DocumentConversionV1.prototype.conversion_target = {
   ANSWER_UNITS: 'ANSWER_UNITS',
   NORMALIZED_HTML: 'NORMALIZED_HTML',
   NORMALIZED_TEXT: 'NORMALIZED_TEXT'
@@ -86,11 +84,11 @@ function fixupContentType(params) {
  * @param  {String} [params.content_type] Set this when the content type cannot be determined from the filename (params.file.path)
  * @param  {Function} callback
  */
-DocumentConversion.prototype.convert = function(params, callback) {
+DocumentConversionV1.prototype.convert = function(params, callback) {
   params = params || {};
-  if (!params.conversion_target || !DocumentConversion.prototype.conversion_target[params.conversion_target]) {
-    var keys = Object.keys(DocumentConversion.prototype.conversion_target);
-    var values = keys.map(function(v) { return DocumentConversion.prototype.conversion_target[v]; });
+  if (!params.conversion_target || !DocumentConversionV1.prototype.conversion_target[params.conversion_target]) {
+    var keys = Object.keys(DocumentConversionV1.prototype.conversion_target);
+    var values = keys.map(function(v) { return DocumentConversionV1.prototype.conversion_target[v]; });
 
     callback(new Error('Missing required parameters: conversion_target. Possible values are: ' + values.join(', ')));
     return;
@@ -156,7 +154,7 @@ DocumentConversion.prototype.convert = function(params, callback) {
                       to 'include', and fields to 'exclude' during indexing (exclude takes precedence over include)
  * @param  {Function} callback
  */
-DocumentConversion.prototype.index = function(params, callback) {
+DocumentConversionV1.prototype.index = function(params, callback) {
   params = params || {};
   if (!params.file && !params.metadata) {
     callback(new Error('Missing required parameters: file or metadata. At least one of those is required.'));
@@ -236,10 +234,10 @@ DocumentConversion.prototype.index = function(params, callback) {
 // give a clear error message for the deprecated methods
 ['getOutput', 'getOutputs', 'getJobLog', 'getJobs', 'getJob', 'createJob', 'getBatchDocument', 'getBatchDocuments',
   'addDocumentToBatch', 'getDocument', 'getDocuments', 'uploadDocument', 'getBatchDocuments', 'updateBatch', 'getBatch', 'createBatch', 'getBatches'].forEach(function(name) {
-    DocumentConversion.prototype[name] = function deprecated() {
+    DocumentConversionV1.prototype[name] = function deprecated() {
       throw new Error('The DocumentConversion.' + name + '() method was deprecated and is no longer available, please use convert() instead.');
   };
 });
 
 
-module.exports = DocumentConversion;
+module.exports = DocumentConversionV1;
